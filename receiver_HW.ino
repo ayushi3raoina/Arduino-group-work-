@@ -90,6 +90,8 @@ void loop() {
         }
       }
 
+      // If we receive data from central let's
+      // read it and parse it for use.
       if (dataChar.written()) {
         String received = dataChar.value();
         parseSensorData(received);
@@ -113,7 +115,7 @@ void loop() {
       }
     }
 
-    delay(500); // Polling delay (adjust as needed)
+    delay(500); // Polling delay
 
     // when the central disconnects, print it out:
     Serial.print(F("Disconnected from central: "));
@@ -121,7 +123,7 @@ void loop() {
   } else {
     runSimulation();
 
-    delay(500); // Polling delay (adjust as needed)
+    delay(500); // Polling delay
   }
 }
 
@@ -133,13 +135,16 @@ void setLightLED(int activePin) {
   digitalWrite(activePin, HIGH);
 }
 
+// This function is for running a simulation to
+// test that everything works while waiting for
+// BT connection
 void runSimulation() {
   simulateIncomingData();
 
-  // Buzzer
+  // Buzzer activation
   digitalWrite(buzzerPin, distance > 100 ? HIGH : LOW);
 
-  // Light level LEDs
+  // Light level LEDs rules
   if (lightLevel < 300) {
     setLightLED(ledLow);
   } else if (lightLevel < 700) {
@@ -150,6 +155,7 @@ void runSimulation() {
 }
 
 // Simulated incoming data (stand-in for Wi-Fi or Bluetooth)
+// This will run while there is no BT connection established
 void simulateIncomingData() {
   // Simulate values changing over time
   static int step = 0;
@@ -186,6 +192,12 @@ void simulateIncomingData() {
   Serial.print("Light: "); Serial.println(lightLevel);
 }
 
+// This function will parse incoming data from BT request
+// into readable and usable format for the leds and buzzer
+// to later read. Since we are dealing with a CSV value then
+// we are first dismantling it, then converting the bytes
+// into strings, and those into ints, and then we print out
+// to make sure we got it right
 void parseSensorData(String data) {
   int comma1 = data.indexOf(',');
   int comma2 = data.lastIndexOf(',');
